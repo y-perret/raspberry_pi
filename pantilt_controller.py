@@ -12,7 +12,7 @@ class PanTiltController:
     tilt_angle = 90
 
     # Initializer / Instance Attributes
-    def __init__(self, pan_pin=3, tilt_pin=5, frequency=50, sleep_time = 0.5, movement_threshold = 20):
+    def __init__(self, pan_pin=3, tilt_pin=5, frequency=50, sleep_time = 0.1, movement_threshold = 0):
         """
         A Pan / Tilt controller is used to control the two servos to create a rotation on two axis
         :param pan_pin: GPIO pin associated to the servo used for panning
@@ -36,6 +36,8 @@ class PanTiltController:
         self.pwm1 = GPIO.PWM(self.pan_pin, self.frequency)
         self.pwm2 = GPIO.PWM(self.tilt_pin, self.frequency)
 
+        self.enable = True
+
     def start(self):
         """
         Start the two PWMs
@@ -51,13 +53,14 @@ class PanTiltController:
         #Clamp between 0 and 180
         angle = max(0, min(angle, 180))
         # Move only if the difference is significant
-        #print(angle)
         if abs(angle - self.pan_angle) > self.movement_threshold:
+            print("pan: " + str(angle))
             # Compute the duty cycle in % corresponding to the angle
             duty_cycle = angle * (self.max_duty_cycle - self.min_duty_cycle) / 180 + self.min_duty_cycle
             self.pwm1.ChangeDutyCycle(duty_cycle)
             sleep(self.sleep_time)
-            #self.pwm1.ChangeDutyCycle(0)
+            #Reduce the wobble between movements
+            self.pwm1.ChangeDutyCycle(0)
             self.pan_angle = angle
 
     def tilt(self, angle):
@@ -69,11 +72,13 @@ class PanTiltController:
         angle = max(30, min(angle, 150))
         # Move only if the difference is significant
         if abs(angle - self.tilt_angle) > self.movement_threshold:
+            print("tilt: " + str(angle))
             #Compute the duty cycle in % corresponding to the angle
             duty_cycle = angle * (self.max_duty_cycle - self.min_duty_cycle) / 180 + self.min_duty_cycle
             self.pwm2.ChangeDutyCycle(duty_cycle)
             sleep(self.sleep_time)
-            #self.pwm2.ChangeDutyCycle(0)
+            #Reduce the wobble between movements
+            self.pwm2.ChangeDutyCycle(0)
             self.tilt_angle = angle
 
     def stop(self):
@@ -85,6 +90,7 @@ class PanTiltController:
         self.pwm1.stop()
         self.pwm2.stop()
         GPIO.cleanup()
+        self.enable = False
 
 
 
