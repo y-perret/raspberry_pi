@@ -54,7 +54,6 @@ class PanTiltController:
         angle = max(0, min(angle, 180))
         # Move only if the difference is significant
         if abs(angle - self.pan_angle) > self.movement_threshold:
-            print("pan: " + str(angle))
             # Compute the duty cycle in % corresponding to the angle
             duty_cycle = angle * (self.max_duty_cycle - self.min_duty_cycle) / 180 + self.min_duty_cycle
             self.pwm1.ChangeDutyCycle(duty_cycle)
@@ -72,7 +71,6 @@ class PanTiltController:
         angle = max(30, min(angle, 150))
         # Move only if the difference is significant
         if abs(angle - self.tilt_angle) > self.movement_threshold:
-            print("tilt: " + str(angle))
             #Compute the duty cycle in % corresponding to the angle
             duty_cycle = angle * (self.max_duty_cycle - self.min_duty_cycle) / 180 + self.min_duty_cycle
             self.pwm2.ChangeDutyCycle(duty_cycle)
