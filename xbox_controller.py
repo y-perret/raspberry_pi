@@ -42,7 +42,6 @@ global tilt_angle
 tilt_angle = 90
 
 ptc = PanTiltController()
-ptc.start()
 
 # One thread for each of the rotation
 thread1 = threading.Thread(target = pan, args = (ptc,))
