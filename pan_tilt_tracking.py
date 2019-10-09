@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 pan_tilt_tracking.py: Script used to track a face with camera fixed on pan/tilt servos
 This is a modified version from the tutorial found on
@@ -39,10 +41,6 @@ def signal_handler(sig, frame):
 
 	# print a status message
 	print("[INFO] You pressed `ctrl + c`! Exiting...")
-
-	# disable the servos
-	#pth.servo_enable(1, False)
-	#pth.servo_enable(2, False)
 
 	# exit
 	sys.exit()
@@ -113,15 +111,16 @@ def pid_process(output, p, i, d, faceCoord, centerCoord):
 	while True:
 		# calculate the error
 		error = centerCoord.value - faceCoord.value
+		#print(error, p.update(error))
 
 		# update the value
-		output.value = p.update(error)
+		output.value += p.update(error, 0.05)
 
 def in_range(val, start, end):
 	# determine the input vale is in the supplied range
 	return (val >= start and val <= end)
 
-def set_servos(pan, tlt, ptc):
+def set_servos(pan, tlt):
 	'''
 	Process to hanbdle the pan/tilt of the servos
 	:param pan: pan angle
@@ -130,13 +129,23 @@ def set_servos(pan, tlt, ptc):
 	# signal trap to handle keyboard interrupt
 	signal.signal(signal.SIGINT, signal_handler)
 
+	# Create a Pan/Tilt Controller
+	ptc = PanTiltController(movement_threshold = 0, sleep_time = 0.05)
+
+	time.sleep(0.5)
+
 
 	# loop indefinitely
 	while True:
 
+                
+		tiltAngle = 180 - tlt.value -90
+		panAngle = pan.value + 90
+
+		#print(panAngle, tiltAngle)
+
 		#Pan and tilt
-		ptc.pan(pan.value)
-		ptc.tilt(tlt.value)
+		ptc.pan_tilt(panAngle, tiltAngle)
 
 # check to see if this is the main body of execution
 if __name__ == "__main__":
@@ -145,13 +154,10 @@ if __name__ == "__main__":
 	ap.add_argument("-c", "--cascade", type=str, default="haarcascade_frontalface_default.xml",
 		help="path to input Haar cascade for face detection")
 	args = vars(ap.parse_args())
+	print(args)
 
 	# start a manager for managing process-safe variables
 	with Manager() as manager:
-
-		# Initialize the pan/tilt controller
-		ptc = PanTiltController()
-		ptc.start()
 
 		# set integer values for the face center (x, y)-coordinates
 		centerX = manager.Value("i", 0)
@@ -162,17 +168,17 @@ if __name__ == "__main__":
 		faceY = manager.Value("i", 0)
 
 		# pan and tilt values will be managed by independant PIDs
-		pan = manager.Value("i", 90)
-		tlt = manager.Value("i", 90)
+		pan = manager.Value("i", 0)
+		tlt = manager.Value("i", 0)
 
 		# set PID values for panning
-		panP = manager.Value("f", 0.09)
-		panI = manager.Value("f", 0.08)
+		panP = manager.Value("f", 0.02)
+		panI = manager.Value("f", 0.005)
 		panD = manager.Value("f", 0.002)
 
 		# set PID values for tilting
-		tiltP = manager.Value("f", 0.11)
-		tiltI = manager.Value("f", 0.10)
+		tiltP = manager.Value("f", 0.02)
+		tiltI = manager.Value("f", 0.005)
 		tiltD = manager.Value("f", 0.002)
 
 		# we have 4 independent processes
@@ -187,7 +193,7 @@ if __name__ == "__main__":
 			args=(pan, panP, panI, panD, faceX, centerX))
 		processTilting = Process(target=pid_process,
 			args=(tlt, tiltP, tiltI, tiltD, faceY, centerY))
-		processSetServos = Process(target=set_servos, args=(pan, tlt, ptc))
+		processSetServos = Process(target=set_servos, args=(pan, tlt))
 
 		# start all 4 processes
 		processFaceCenter.start()

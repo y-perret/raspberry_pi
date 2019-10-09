@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 pid.py: This class implements a proportional-Integral-Derivative controller (PID) used to reach an optimum
 value quickly and accurately. See https://www.pyimagesearch.com/2019/04/01/pan-tilt-face-tracking-with-a-raspberry-pi-and-opencv/
@@ -51,8 +52,12 @@ class PID:
 		self.prevTime = self.currTime
 		self.prevError = error
 
-		# sum the terms and return
-		return sum([
-			self.kP * self.cP,
-			self.kI * self.cI,
-			self.kD * self.cD])
+		# No update needed
+		if error == 0:
+			return 0
+		else:
+			# sum the terms and return
+			return sum([
+				self.kP * self.cP,
+				self.kI * self.cI,
+				self.kD * self.cD])
