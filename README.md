@@ -20,10 +20,10 @@ The material used in this project is:
 
 Python installed with the following libraries:
 
-*[OpenCV](https://opencv.org) - Library for face detection
-*[pigpio](http://abyz.me.uk/rpi/pigpio/) - Library for the Raspberry which allows control of the General Purpose Input
+* [OpenCV](https://opencv.org) - Library for face detection
+* [pigpio](http://abyz.me.uk/rpi/pigpio/) - Library for the Raspberry which allows control of the General Purpose Input
 Outputs (GPIO)
-*[inputs](https://pypi.org/project/inputs/) - Inputs aims to provide cross-platform Python support for keyboards, mice
+* [inputs](https://pypi.org/project/inputs/) - Inputs aims to provide cross-platform Python support for keyboards, mice
 and gamepads
 
 ## Control of pan/tilt servos using a controller
